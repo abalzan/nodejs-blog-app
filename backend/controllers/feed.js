@@ -23,13 +23,18 @@ exports.createPost = (req, res, next) => {
         error.statusCode = 422;
         throw error;
     }
-
+    if (!req.file) {
+        const error = new Error('No image provided.');
+        error.statusCode = 422;
+        throw error;
+    }
+    const imageUrl = req.file.path;
     const title = req.body.title;
     const content = req.body.content;
 
     const post = new Post({
         title: title,
-        imageUrl: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60',
+        imageUrl: imageUrl,
         content: content,
         creator: {
             name: 'John Doe',
