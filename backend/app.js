@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 app.use(multer({ storage: filestorage, fileFilter: fileFilter }).single('image'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-const MONGODB_URI = 'mongodb+srv://andrei:R9LeoQS78jgS0g04@nodejscompletecourseclu.xgbdg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+const MONGODB_URI = 'mongodb+srv://andrei:R9LeoQS78jgS0g04@nodejscompletecourseclu.xgbdg.mongodb.net/blog-app?retryWrites=true&w=majority'
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
