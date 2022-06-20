@@ -21,4 +21,9 @@ router.put('/signup', [
     body('name').isLength({min: 3}).withMessage('Name must be at least 3 characters long')
 ], authController.signup);
 
+router.post('/login', [
+    body('email').isEmail().withMessage('Please enter a valid email'),
+    body('password').isLength({min: 6}).withMessage('Password must be at least 6 characters long')
+], authController.login);
+
 module.exports = router;
