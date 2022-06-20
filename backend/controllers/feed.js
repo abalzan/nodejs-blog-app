@@ -161,9 +161,20 @@ exports.deletePost = (req, res, next) => {
         clearImage(post.imageUrl);
         return Post.findByIdAndRemove(postId);
     }).then(result => {
+        return User.findById(req.userId);
+    }).then(user => {
+        const postIndex = user.posts.indexOf(postId);
+        user.posts.splice(postIndex, 1);
+        return user.save();
+    }).then(() => {
         res.status(200).json({
             message: 'Post deleted successfully.'
         });
+    }).catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
     });
 }
 
