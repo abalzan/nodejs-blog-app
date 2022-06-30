@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 app.use(multer({ storage: filestorage, fileFilter: fileFilter }).single('image'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-const MONGODB_URI = 'mongodb+srv://andrei:R9LeoQS78jgS0g04@nodejscompletecourseclu.xgbdg.mongodb.net/blog-app?retryWrites=true&w=majority'
+const MONGODB_URI = process.env.MONGO_URI;
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -52,7 +52,13 @@ app.use((error, req, res, next) => {
 mongoose.connect(MONGODB_URI)
     .then(result => {
         console.log('Connected to MongoDB');
-        app.listen(8080);
+        let server = app.listen(8080);
+        const io = require('socket.io')(server, {
+            cors: {
+                origin: "http://localhost:3000",
+                methods: ["GET", "POST"]
+            }
+        });
     }).catch(err => {
         console.log('Error connecting to MongoDB:', err.message);
     })
