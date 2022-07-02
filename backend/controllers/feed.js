@@ -162,6 +162,7 @@ exports.deletePost = async (req, res, next) => {
         const postIndex = user.posts.indexOf(postId);
         user.posts.splice(postIndex, 1);
         await user.save();
+        io.getIO().emit('posts', {action: 'delete', post: postId});
 
         res.status(200).json({
             message: 'Post deleted successfully.'
