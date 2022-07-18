@@ -29,11 +29,19 @@ module.exports = buildSchema(`
         name: String!
         password: String!
     }
+    
+    input PostInputData {
+        title: String!
+        imageUrl: String!
+        content: String!
+    }
+    
     type RootQuery {
         login(email: String!, password: String!) : AuthData
     }
     type RootMutation {
         createUser(userInput: UserInput): User!
+        createPost(postInput: PostInputData): Post!
     }
     schema {
         query: RootQuery
