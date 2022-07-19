@@ -16,7 +16,7 @@ module.exports = {
         if(errors.length > 0) {
             const error = new Error('Invalid input, please check your data.');
             error.data = errors;
-            error.statusCode = 422;
+            error.code = 422;
             throw error;
         }
 
@@ -37,13 +37,13 @@ module.exports = {
         const user = await User.findOne({email: email});
         if (!user) {
             const error = new Error('User not found.');
-            error.statusCode = 401;
+            error.code = 401;
             throw error;
         }
         const isEqual = await bcrypt.compare(password, user.password);
         if (!isEqual) {
             const error = new Error('Password is incorrect.');
-            error.statusCode = 401;
+            error.code = 401;
             throw error;
         }
         const token = jwt.sign({
@@ -55,6 +55,11 @@ module.exports = {
     },
 
     createPost: async ({postInput}, req) => {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.');
+            error.code = 401;
+            throw error;
+        }
         const errors = [];
         if(validator.isEmpty(postInput.title || !validator.isLength(postInput.title, {min: 5}))) {
             errors.push({message: 'Title is invalid'});
@@ -65,17 +70,24 @@ module.exports = {
         if(errors.length > 0) {
             const error = new Error('Invalid input, please check your data.');
             error.data = errors;
-            error.statusCode = 422;
+            error.code = 422;
+            throw error;
+        }
+        const user = await User.findById(req.userId);
+        if (!user) {
+            const error = new Error('User not found.');
+            error.code = 401;
             throw error;
         }
         const post = new Post({
             title: postInput.title,
             content: postInput.content,
             imageUrl: postInput.imageUrl,
-            // creator: req.userId
+            creator: user
         });
         const createdPost = await post.save();
-        //Add the post to the user's posts
+        user.posts.push(createdPost);
+        await user.save();
         return {...createdPost._doc,
             _id: createdPost._id.toString(),
             createdAt: createdPost.createdAt.toISOString(),
