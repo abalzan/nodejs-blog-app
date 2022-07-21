@@ -8,7 +8,7 @@ const {graphqlHTTP} = require('express-graphql');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 const auth = require('./middleware/auth');
-const fs = require("fs");
+const { clearImage } = require('./util/file');
 
 const app = express();
 
@@ -94,8 +94,3 @@ mongoose.connect(MONGODB_URI)
     }).catch(err => {
         console.log('Error connecting to MongoDB:', err.message);
     })
-
-const clearImage = filePath => {
-    filePath = path.join(__dirname, '..', filePath);
-    fs.unlink(filePath, err => console.log(err));
-}

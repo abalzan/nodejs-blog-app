@@ -3,6 +3,7 @@ const Post = require('../models/post');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
+const { clearImage } = require('../util/file');
 
 module.exports = {
     createUser: async ({userInput }, req) => {
@@ -85,7 +86,7 @@ module.exports = {
             imageUrl: postInput.imageUrl,
             creator: user
         });
-        const createdPost = await post.save();f
+        const createdPost = await post.save();
         user.posts.push(createdPost);
         await user.save();
         return {...createdPost._doc,
@@ -176,5 +177,32 @@ module.exports = {
             _id: updatedPost._id.toString(),
             createdAt: updatedPost.createdAt.toISOString(),
             updatedAt: updatedPost.updatedAt.toISOString()};
+    },
+
+    deletePost: async ({postId}, req) => {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.');
+            error.code = 401;
+            throw error;
+        }
+        const post = await Post.findById(postId);
+        if (!post) {
+            const error = new Error('Post not found.');
+            error.code = 404;
+            throw error;
+        }
+        if(post.creator._id.toString() !== req.userId.toString()) {
+            const error = new Error('Not authorized.');
+            error.code = 403;
+            throw error;
+        }
+        if(post.imageUrl !== 'undefined') {
+            clearImage(post.imageUrl);
+        }
+        await Post.findOneAndRemove(postId);
+        const user = await User.findById(req.userId);
+        user.posts.pull(postId);
+        await user.save();
+        return true;
     }
 }
